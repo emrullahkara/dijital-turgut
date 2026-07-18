@@ -2,76 +2,52 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMUT POLYESTER - İş Yönetimi</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0fdf4; }
+        .card { padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .tab-box { display: flex; gap: 5px; margin-bottom: 20px; }
         .nav-btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; color: white; }
-        .card { padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .teklif-color { background: #dcfce7; border-left: 6px solid #059669; }
         .musteri-color { background: #dbeafe; border-left: 6px solid #2563eb; }
-        .borc-color { background: #ffedd5; border-left: 6px solid #ea580c; }
     </style>
 </head>
 <body>
 
 <div class="tab-box">
-    <button class="nav-btn" style="background:#059669" onclick="show('teklif')">Teklif</button>
-    <button class="nav-btn" style="background:#2563eb" onclick="show('musteri')">Müşteriler</button>
-    <button class="nav-btn" style="background:#ea580c" onclick="show('borc')">Borçlarım</button>
+    <button class="nav-btn" style="background:#059669" onclick="location.reload()">Ana Menü</button>
 </div>
 
-<!-- 1. Teklif -->
-<div id="teklif" class="card teklif-color">
-    <h2>Teklif Hazırlama</h2>
-    <p>Hesaplamalar buraya eklenecek...</p>
-</div>
-
-<!-- 2. Müşteriler -->
-<div id="musteri" class="card musteri-color" style="display:none;">
-    <h2>Müşterilerim</h2>
-    <button onclick="yeniMusteriEkle()" style="width:100%; padding:12px; background:#2563eb; color:white; border:none; border-radius:8px; margin-bottom:15px; font-weight:bold; cursor:pointer;">+ Müşteri Ekle</button>
-    <div id="musteri-listesi"></div>
-</div>
-
-<!-- 3. Borçlar -->
-<div id="borc" class="card borc-color" style="display:none;">
-    <h2>Borçlarım</h2>
-    <p>Gider ve kira takibi buraya eklenecek...</p>
+<!-- Müşteri Detay Ekranı -->
+<div id="detay-ekran" class="card musteri-color">
+    <h2 id="detay-isim">Müşteri İsmi</h2>
+    <p>Güncel Bakiye: <b id="detay-bakiye">0 TL</b></p>
+    <hr>
+    <button onclick="islemEkle('borc')" style="background:#dc2626; color:white; border:none; padding:10px; border-radius:5px;">Borç Ekle</button>
+    <button onclick="islemEkle('tahsilat')" style="background:#059669; color:white; border:none; padding:10px; border-radius:5px;">Tahsilat Ekle</button>
+    <div id="hareket-listesi" style="margin-top:20px;"></div>
 </div>
 
 <script>
+    // URL'den seçilen müşteri indeksini alalım (veya basitleştirelim)
+    let seciliIndex = localStorage.getItem('seciliIndex');
     let musteriler = JSON.parse(localStorage.getItem('musteriler')) || [];
+    let musteri = musteriler[seciliIndex];
 
-    function show(id) {
-        document.getElementById('teklif').style.display = (id === 'teklif') ? 'block' : 'none';
-        document.getElementById('musteri').style.display = (id === 'musteri') ? 'block' : 'none';
-        document.getElementById('borc').style.display = (id === 'borc') ? 'block' : 'none';
-    }
+    document.getElementById('detay-isim').innerText = musteri.isim;
+    document.getElementById('detay-bakiye').innerText = musteri.bakiye + " TL";
 
-    function yeniMusteriEkle() {
-        let isim = prompt("Müşteri ismi nedir?");
-        if (isim) {
-            musteriler.push({ id: Date.now(), isim: isim, bakiye: 0 });
+    function islemEkle(tur) {
+        let tutar = prompt(tur === 'borc' ? "Borç tutarını girin:" : "Tahsilat tutarını girin:");
+        if (tutar) {
+            tutar = parseFloat(tutar);
+            if (tur === 'borc') musteri.bakiye += tutar;
+            else musteri.bakiye -= tutar;
+            
+            musteriler[seciliIndex] = musteri;
             localStorage.setItem('musteriler', JSON.stringify(musteriler));
-            listeyiGuncelle();
+            location.reload();
         }
     }
-
-    function listeyiGuncelle() {
-        let listeDiv = document.getElementById('musteri-listesi');
-        listeDiv.innerHTML = '';
-        musteriler.forEach(m => {
-            listeDiv.innerHTML += `
-                <div onclick="alert('${m.isim} detaylarına gidiliyor...')" style="background:white; padding:15px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer;">
-                    <span><b>${m.isim}</b></span>
-                    <span>${m.bakiye} TL</span>
-                </div>`;
-        });
-    }
-
-    listeyiGuncelle();
 </script>
 </body>
 </html>
