@@ -12,9 +12,9 @@
         label { font-size: 12px; font-weight: bold; color: #555; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #059669; color: white; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; }
+        .btn-whatsapp { background: #25d366; }
         .item-row { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
         .toplam-alan { font-weight: bold; font-size: 18px; text-align: right; margin-bottom: 15px; color: #059669; }
-        .btn-whatsapp { background: #25d366; }
     </style>
 </head>
 <body>
@@ -35,7 +35,6 @@
             <option value="1250" data-tip="adet">Sandalye İşçilikli (1250 TL)</option>
         </select>
     </div>
-    
     <div id="ebat-alan" class="form-control" style="display:none;">
         <label>En x Boy (cm)</label>
         <div style="display: flex; gap: 5px;">
@@ -43,7 +42,6 @@
             <input type="number" id="boy" placeholder="Boy">
         </div>
     </div>
-
     <div class="form-control">
         <label>Adet</label>
         <input type="number" id="adet" value="1">
@@ -63,7 +61,6 @@
         const tip = document.getElementById('urun').options[document.getElementById('urun').selectedIndex].dataset.tip;
         document.getElementById('ebat-alan').style.display = (tip === 'm2') ? 'block' : 'none';
     }
-
     function hesapla() {
         const urunEl = document.getElementById('urun');
         const tip = urunEl.options[urunEl.selectedIndex].dataset.tip;
@@ -79,7 +76,6 @@
         veriler.push({urun: urunEl.options[urunEl.selectedIndex].text.split(' (')[0], miktar, fiyat});
         render();
     }
-
     function render() {
         const liste = document.getElementById('liste');
         liste.innerHTML = '';
@@ -94,11 +90,10 @@
         });
         document.getElementById('toplam').innerText = `Toplam: ${tFiyat.toLocaleString()} TL`;
     }
-
     function whatsappPaylas() {
         let metin = "Dijital Turgut - Teklifim:\n\n";
-        veriler.forEach(v => { metin += `${v.urun} (${v.miktar}): ${v.fiyat.toLocaleString()} TL\n`; });
-        metin += `\nGENEL TOPLAM: ${document.getElementById('toplam').innerText.split(': ')[1]}`;
+        veriler.forEach(v => { metin += `*${v.urun}* (${v.miktar}): ${v.fiyat.toLocaleString()} TL\n`; });
+        metin += `\n*GENEL TOPLAM:* ${document.getElementById('toplam').innerText.split(': ')[1]}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(metin)}`, '_blank');
     }
 </script>
