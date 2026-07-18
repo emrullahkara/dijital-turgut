@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijital Emrullah</title>
+    <style>
+        body { font-family: sans-serif; padding: 10px; }
+        .input-group { display: grid; gap: 10px; margin-bottom: 20px; }
+        input, select, button { padding: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+        .summary { font-weight: bold; margin-top: 20px; padding: 10px; background: #f4f4f4; }
+    </style>
+</head>
+<body>
+
+<h2>Dijital Emrullah</h2>
+
+<div class="input-group">
+    <select id="urun">
+        <option value="1500" data-tip="adet">Kapı Kasası (1500 TL)</option>
+        <option value="1500" data-tip="adet">Kapı Kanadı (1500 TL)</option>
+        <option value="2750" data-tip="adet">Kapı Kasa+Kanat (2750 TL)</option>
+        <option value="1500" data-tip="m2">Tek Yön Düz Mat (1500 TL)</option>
+        <option value="1750" data-tip="m2">Tek Yön Çıtalı Mat (1750 TL)</option>
+        <option value="3000" data-tip="m2">Tek Yön Düz Parlak (3000 TL)</option>
+        <option value="3500" data-tip="m2">Tek Yön Çıtalı Parlak (3500 TL)</option>
+        <option value="800" data-tip="adet">Sandalye Basit (800 TL)</option>
+        <option value="1250" data-tip="adet">Sandalye İşçilikli (1250 TL)</option>
+    </select>
+    <input type="number" id="en" placeholder="En (cm)">
+    <input type="number" id="boy" placeholder="Boy (cm)">
+    <input type="number" id="adet" placeholder="Adet" value="1">
+    <button onclick="hesapla()">Ekle</button>
+</div>
+
+<table>
+    <thead><tr><th>Ürün</th><th>En-Boy</th><th>M2</th><th>Fiyat</th></tr></thead>
+    <tbody id="liste"></tbody>
+</table>
+
+<div class="summary" id="toplam">
+    Toplam M2: 0 | Toplam Fiyat: 0 TL
+</div>
+
+<script>
+    let veriler = [];
+
+    function hesapla() {
+        const urunEl = document.getElementById('urun');
+        const en = parseFloat(document.getElementById('en').value) || 0;
+        const boy = parseFloat(document.getElementById('boy').value) || 0;
+        const adet = parseInt(document.getElementById('adet').value) || 1;
+        const fiyatBirim = parseFloat(urunEl.value);
+        const tip = urunEl.options[urunEl.selectedIndex].dataset.tip;
+
+        let m2 = (tip === 'm2') ? (en * boy) / 10000 : 0;
+        let fiyat = (tip === 'm2') ? (m2 * fiyatBirim * adet) : (fiyatBirim * adet);
+
+        veriler.push({urun: urunEl.options[urunEl.selectedIndex].text, en, boy, m2, fiyat});
+        render();
+    }
+
+    function render() {
+        const liste = document.getElementById('liste');
+        liste.innerHTML = '';
+        let tM2 = 0, tFiyat = 0;
+
+        veriler.forEach(v => {
+            liste.innerHTML += `<tr><td>${v.urun}</td><td>${v.en}x${v.boy}</td><td>${v.m2.toFixed(2)}</td><td>${v.fiyat}</td></tr>`;
+            tM2 += v.m2;
+            tFiyat += v.fiyat;
+        });
+        document.getElementById('toplam').innerText = `Toplam M2: ${tM2.toFixed(2)} | Toplam Fiyat: ${tFiyat} TL`;
+    }
+</script>
+</body>
+</html>
