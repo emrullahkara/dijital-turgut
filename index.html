@@ -39,6 +39,11 @@
     let musteriler = JSON.parse(localStorage.getItem('musteriler')) || [];
     let seciliIndex = null;
 
+    // Sayıları binlik ayraçlı gösteren yardımcı fonksiyon
+    function formatPara(sayi) {
+        return sayi.toLocaleString('tr-TR') + ' TL';
+    }
+
     function yeniMusteriEkle() {
         let isim = prompt("Müşteri ismi:");
         if (isim) {
@@ -52,7 +57,7 @@
         let liste = document.getElementById('musteri-listesi');
         liste.innerHTML = '';
         musteriler.forEach((m, i) => {
-            liste.innerHTML += `<div onclick="detayaGit(${i})" style="padding:15px; border-bottom:1px solid #ccc; cursor:pointer;">${m.isim} - <b>${m.bakiye} TL</b></div>`;
+            liste.innerHTML += `<div onclick="detayaGit(${i})" style="padding:15px; border-bottom:1px solid #ccc; cursor:pointer;">${m.isim} - <b>${formatPara(m.bakiye)}</b></div>`;
         });
     }
 
@@ -61,15 +66,14 @@
         document.getElementById('ana-menu').style.display = 'none';
         document.getElementById('detay-ekran').style.display = 'block';
         document.getElementById('detay-isim').innerText = musteriler[i].isim;
-        document.getElementById('detay-bakiye').innerText = musteriler[i].bakiye + " TL";
+        document.getElementById('detay-bakiye').innerText = formatPara(musteriler[i].bakiye);
         
         let liste = document.getElementById('hareket-listesi');
         liste.innerHTML = '<h3>Hareket Geçmişi</h3>';
         
-        // islemler yoksa boş dizi olarak varsay
         let islemler = musteriler[i].islemler || [];
         islemler.forEach(islem => {
-            liste.innerHTML += `<div class="hareket-item"><span>${islem.tarih}</span> <span><b>${islem.tur}:</b> ${islem.tutar} TL</span></div>`;
+            liste.innerHTML += `<div class="hareket-item"><span>${islem.tarih}</span> <span><b>${islem.tur}:</b> ${formatPara(islem.tutar)}</span></div>`;
         });
     }
 
