@@ -5,15 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dijital Turgut</title>
     <style>
-        :root { --primary: #6366f1; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 15px; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #1e293b; }
+        :root { --primary: #059669; --bg-overlay: rgba(255, 255, 255, 0.9); }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; padding: 15px; 
+            background: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') no-repeat center center fixed; 
+            background-size: cover;
+            min-height: 100vh;
+        }
+        .card { background: var(--bg-overlay); padding: 20px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); backdrop-filter: blur(10px); }
+        h2 { text-align: center; color: #064e3b; margin-top: 0; }
         .form-control { margin-bottom: 15px; }
-        label { display: block; font-size: 14px; margin-bottom: 5px; color: #64748b; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .list-item { border-bottom: 1px solid #f1f5f9; padding: 10px 0; display: flex; justify-content: space-between; font-size: 14px; }
+        label { display: block; font-size: 14px; margin-bottom: 5px; color: #374151; font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 12px; box-sizing: border-box; background: rgba(255,255,255,0.7); }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:active { transform: scale(0.98); }
+        .list-item { border-bottom: 1px solid #d1d5db; padding: 10px 0; display: flex; justify-content: space-between; font-size: 14px; color: #111827; }
     </style>
 </head>
 <body>
@@ -60,7 +67,8 @@
     let veriler = [];
 
     function toggleInputs() {
-        const tip = document.getElementById('urun').options[document.getElementById('urun').selectedIndex].dataset.tip;
+        const urun = document.getElementById('urun');
+        const tip = urun.options[urun.selectedIndex].dataset.tip;
         document.getElementById('ebat-alan').style.display = (tip === 'm2') ? 'block' : 'none';
     }
 
@@ -75,7 +83,7 @@
         let m2 = (tip === 'm2') ? (en * boy) / 10000 : 0;
         let fiyat = (tip === 'm2') ? (m2 * fiyatBirim * adet) : (fiyatBirim * adet);
 
-        veriler.push({urun: urunEl.options[urunEl.selectedIndex].text, m2, fiyat});
+        veriler.push({urun: urunEl.options[urunEl.selectedIndex].text, fiyat: fiyat});
         render();
     }
 
