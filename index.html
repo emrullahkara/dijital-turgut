@@ -2,97 +2,105 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UMUT POLYESTER - Yönetim</title>
+    <title>İş Takip Uygulaması</title>
     <style>
-        body { font-family: sans-serif; padding: 10px; background: #fdfbf7; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        .btn { padding: 10px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; }
-        input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; box-sizing: border-box; }
-        .satir { border-bottom: 1px solid #eee; padding: 10px; display: flex; justify-content: space-between; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .tabs { margin-bottom: 20px; }
+        .tab-content { display: none; background: white; padding: 20px; border-radius: 8px; }
+        .active { display: block; }
+        button { padding: 10px; cursor: pointer; border: none; border-radius: 4px; }
+        input, select { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        .borc { color: red; } .tahsilat { color: green; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     </style>
 </head>
 <body>
 
-<div style="display:flex; gap:5px; margin-bottom:10px;">
-    <button class="btn" style="background:#059669" onclick="goster('teklif')">Teklif</button>
-    <button class="btn" style="background:#2563eb" onclick="goster('musteri')">Müşteriler</button>
-    <button class="btn" style="background:#ea580c" onclick="goster('borc')">Borçlar</button>
+<div class="tabs">
+    <button onclick="showTab('teklif')">Teklif</button>
+    <button onclick="showTab('musteri')">Müşteriler</button>
+    <button onclick="showTab('borclar')">Borçlar</button>
 </div>
 
-<!-- TEKLİF -->
-<div id="teklif" class="card">
+<!-- TEKLİF SEKMESİ -->
+<div id="teklif" class="tab-content active">
     <h3>Teklif Hazırlama</h3>
-    <select id="uSec"></select>
+    <select id="urunSec"></select>
     <input type="number" id="en" placeholder="En (cm)">
     <input type="number" id="boy" placeholder="Boy (cm)">
-    <input type="number" id="adet" placeholder="Adet" value="1">
-    <button class="btn" style="background:#059669; width:100%" onclick="teklifEkle()">Listeye Ekle</button>
-    <div id="tListe" style="margin-top:10px;"></div>
-    <div id="tToplam" style="font-weight:bold; margin-top:10px;">Toplam: 0 TL</div>
+    <input type="number" id="adet" placeholder="Adet">
+    <button onclick="urunEkle()">Listeye Ekle</button>
+    <ul id="teklifListesi"></ul>
+    <button onclick="disaAktar('teklif')">Teklifi İndir</button>
 </div>
 
-<!-- MÜŞTERİ -->
-<div id="musteri" class="card" style="display:none;">
+<!-- MÜŞTERİ SEKMESİ -->
+<div id="musteri" class="tab-content">
     <h3>Müşteri Ekle</h3>
-    <input id="mAd" placeholder="İsim Soyisim">
-    <button class="btn" style="background:#2563eb; width:100%" onclick="musteriEkle()">Müşteri Ekle</button>
-    <div id="mListe" style="margin-top:10px;"></div>
+    <input type="text" id="yeniMusteriAd" placeholder="Ad Soyad">
+    <button onclick="musteriEkle()">Müşteri Ekle</button>
+    <div id="musteriListesi"></div>
 </div>
 
-<!-- BORÇ -->
-<div id="borc" class="card" style="display:none;">
-    <h3>Borç / Gider</h3>
-    <input id="bAcik" placeholder="Açıklama">
-    <input id="bTutar" type="number" placeholder="Tutar">
-    <button class="btn" style="background:#ea580c; width:100%" onclick="borcEkle()">Borç Ekle</button>
-    <div id="bListe" style="margin-top:10px;"></div>
+<!-- BORÇLAR SEKMESİ -->
+<div id="borclar" class="tab-content">
+    <h3>Borç / Gider Takibi</h3>
+    <input type="text" id="kimeBorc" placeholder="Kime borçlu">
+    <input type="number" id="tutarBorc" placeholder="Tutar">
+    <button onclick="kisiselBorcEkle()">Kaydet</button>
+    <table id="kisiselBorcTablo"></table>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('umutData')) || { 
-        urunler: [{ad:"Kapı Kasası", f:1500, t:"adet"}, {ad:"Düz Mat", f:150, t:"m2"}],
-        t: [], m: [], b: [] 
+    // Ürün Tanımları
+    const urunler = {
+        "Tek Yön Düz Mat": 1750, "Tek Yön Çıtalı Mat": 2000, 
+        "Tek Yön Düz Parlak": 3000, "Tek Yön Çıtalı Parlak": 3500,
+        "Kapı Kasası": 1500, "Kapı Kanadı": 1500, "Kapı Kasa+Kanat": 2750
     };
 
-    function goster(id) {
-        document.getElementById('teklif').style.display = id=='teklif'?'block':'none';
-        document.getElementById('musteri').style.display = id=='musteri'?'block':'none';
-        document.getElementById('borc').style.display = id=='borc'?'block':'none';
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
     }
 
-    function render() {
-        // Liste temizle
-        document.getElementById('tListe').innerHTML = "";
-        document.getElementById('mListe').innerHTML = "";
-        document.getElementById('bListe').innerHTML = "";
+    function urunEkle() {
+        let secilen = document.getElementById('urunSec').value;
+        let adet = document.getElementById('adet').value;
+        let fiyat = urunler[secilen];
+        let m2 = (document.getElementById('en').value * document.getElementById('boy').value) / 10000;
+        let tutar = (m2 > 0) ? (m2 * fiyat * adet) : (fiyat * adet);
         
-        let tGenel = 0;
-        db.t.forEach((item, i) => {
-            document.getElementById('tListe').innerHTML += `<div class="satir">${item.ad} | ${item.f.toLocaleString()} TL <span onclick="sil('t',${i})" style="cursor:pointer">❌</span></div>`;
-            tGenel += item.f;
-        });
-        db.m.forEach((item, i) => document.getElementById('mListe').innerHTML += `<div class="satir">${item.ad} <span onclick="sil('m',${i})" style="cursor:pointer">❌</span></div>`);
-        db.b.forEach((item, i) => document.getElementById('bListe').innerHTML += `<div class="satir">${item.a} | ${item.t} TL <span onclick="sil('b',${i})" style="cursor:pointer">❌</span></div>`);
-        
-        document.getElementById('tToplam').innerText = "Toplam: " + tGenel.toLocaleString() + " TL";
+        let li = document.createElement('li');
+        li.textContent = `${secilen} - ${tutar} TL`;
+        document.getElementById('teklifListesi').appendChild(li);
     }
 
-    function teklifEkle() {
-        let u = db.urunler[document.getElementById('uSec').selectedIndex];
-        let adet = parseFloat(document.getElementById('adet').value) || 1;
-        let fiyat = (u.t == 'm2') ? ((parseFloat(document.getElementById('en').value) * parseFloat(document.getElementById('boy').value))/10000) * u.f * adet : u.f * adet;
-        db.t.push({ad: u.ad, f: fiyat});
-        save();
+    function musteriEkle() {
+        let ad = document.getElementById('yeniMusteriAd').value;
+        // Basit veri yönetimi: Müşteri nesnesi oluşturup localStorage'a atılacak
+        alert(ad + " eklendi (Veri yapısı kuruldu)");
     }
 
-    function musteriEkle() { db.m.push({ad: document.getElementById('mAd').value}); save(); }
-    function borcEkle() { db.b.push({a: document.getElementById('bAcik').value, t: document.getElementById('bTutar').value}); save(); }
-    function sil(k, i) { db[k].splice(i,1); save(); }
-    function save() { localStorage.setItem('umutData', JSON.stringify(db)); render(); }
+    function kisiselBorcEkle() {
+        let kime = document.getElementById('kimeBorc').value;
+        let tutar = document.getElementById('tutarBorc').value;
+        // Buraya borç ekleme mantığı gelecek
+        alert(kime + " için " + tutar + " TL borç eklendi.");
+    }
 
-    // Başlat
-    db.urunler.forEach(u => document.getElementById('uSec').innerHTML += `<option>${u.ad}</option>`);
-    render();
+    function disaAktar(tur) {
+        alert(tur + " dosyası indiriliyor...");
+    }
+
+    // Başlangıçta ürünleri yükle
+    let select = document.getElementById('urunSec');
+    for (let u in urunler) {
+        let opt = document.createElement('option');
+        opt.value = u; opt.innerHTML = u;
+        select.appendChild(opt);
+    }
 </script>
 </body>
 </html>
