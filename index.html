@@ -2,94 +2,80 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UMUT POLYESTER - İş Yönetimi</title>
+    <title>UMUT POLYESTER - Yönetim</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0fdf4; }
-        .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .nav-btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; color: white; }
-        .item-row { border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-        .delete-btn { color: red; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .btn { padding: 10px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; width: 100%; margin-top: 5px; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 8px 0; }
     </style>
 </head>
 <body>
 
-<div style="display:flex; gap:5px; margin-bottom:15px;">
-    <button class="nav-btn" style="background:#059669" onclick="show('teklif')">Teklif</button>
-    <button class="nav-btn" style="background:#2563eb" onclick="show('musteri')">Müşteriler</button>
-    <button class="nav-btn" style="background:#ea580c" onclick="show('borc')">Borçlar</button>
+<div style="display:flex; gap:5px;">
+    <button class="btn" style="background:#059669" onclick="goster('teklif')">Teklif</button>
+    <button class="btn" style="background:#2563eb" onclick="goster('musteri')">Müşteriler</button>
+    <button class="btn" style="background:#ea580c" onclick="goster('borc')">Borçlar</button>
 </div>
 
-<!-- TEKLİF -->
+<!-- TEKLİF SEKMESİ -->
 <div id="teklif" class="card">
-    <h2>Teklif <span onclick="toggleAyarlar()" style="cursor:pointer">⚙️</span></h2>
-    <div id="ayarlar-paneli" style="display:none; background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:10px;">
-        <textarea id="urunJSON" style="width:100%; height:80px; font-size:11px;"></textarea>
-        <button onclick="ayarlariKaydet()" style="width:100%; background:#064e3b; color:white; border:none; padding:5px;">Kaydet</button>
-    </div>
-    <select id="urun" onchange="toggleInputs()"></select>
-    <div id="ebat-alan" style="display:none; margin:10px 0;">
-        <input type="number" id="en" placeholder="En (cm)">
-        <input type="number" id="boy" placeholder="Boy (cm)">
-    </div>
-    <input type="number" id="adet" value="1" style="width:100%; padding:10px; box-sizing:border-box; margin:10px 0;">
-    <button onclick="teklifEkle()" style="width:100%; background:#059669; color:white; border:none; padding:12px;">Ekle</button>
-    <div id="teklif-liste"></div>
-    <div id="toplam" style="font-weight:bold; margin-top:10px;">Toplam: 0 TL</div>
+    <h3>Ürün Yönetimi</h3>
+    <input id="uAd" placeholder="Ürün Adı">
+    <input id="uFiyat" type="number" placeholder="Fiyat">
+    <select id="uTip"><option value="adet">Adet</option><option value="m2">m2</option></select>
+    <button class="btn" style="background:#064e3b" onclick="urunEkle()">Ürün Ekle</button>
+    <hr>
+    <select id="urunSec"></select>
+    <button class="btn" style="background:#059669" onclick="teklifHesapla()">Listeye Ekle</button>
+    <div id="liste"></div>
 </div>
 
-<!-- MÜŞTERİ -->
+<!-- MÜŞTERİ SEKMESİ -->
 <div id="musteri" class="card" style="display:none;">
-    <h2>Müşteriler <button onclick="yeniMusteri()" style="background:#2563eb; color:white; border:none; padding:5px 10px; border-radius:5px;">+</button></h2>
-    <div id="musteri-liste"></div>
+    <h3>Müşteriler</h3>
+    <input id="mAd" placeholder="Müşteri Adı">
+    <button class="btn" style="background:#2563eb" onclick="musteriEkle()">Müşteri Ekle</button>
+    <div id="mListe"></div>
 </div>
 
-<!-- BORÇLAR -->
+<!-- BORÇ SEKMESİ -->
 <div id="borc" class="card" style="display:none;">
-    <h2>Giderler <button onclick="yeniBorc()" style="background:#ea580c; color:white; border:none; padding:5px 10px; border-radius:5px;">+</button></h2>
-    <div id="borc-liste"></div>
+    <h3>Gider / Borç</h3>
+    <input id="bAcik" placeholder="Açıklama">
+    <input id="bTutar" type="number" placeholder="Tutar">
+    <button class="btn" style="background:#ea580c" onclick="borcEkle()">Borç Ekle</button>
+    <div id="bListe"></div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('umutData')) || { musteriler:[], borclar:[], teklifler:[], urunler:[{ad:"Kapı Kasası", fiyat:1500, tip:"adet"}] };
+    let db = JSON.parse(localStorage.getItem('umutData')) || {m:[], b:[], u:[{ad:"Kapı Kasası",f:1500,t:"adet"}], t:[]};
 
-    function show(id) {
-        ['teklif', 'musteri', 'borc'].forEach(s => document.getElementById(s).style.display = (s === id ? 'block' : 'none'));
+    function goster(id) {
+        document.getElementById('teklif').style.display = id=='teklif'?'block':'none';
+        document.getElementById('musteri').style.display = id=='musteri'?'block':'none';
+        document.getElementById('borc').style.display = id=='borc'?'block':'none';
     }
 
-    // TEKLİF
-    function toggleAyarlar() { document.getElementById('ayarlar-paneli').style.display = 'block'; document.getElementById('urunJSON').value = JSON.stringify(db.urunler); }
-    function ayarlariKaydet() { db.urunler = JSON.parse(document.getElementById('urunJSON').value); save(); location.reload(); }
-    function toggleInputs() { document.getElementById('ebat-alan').style.display = (db.urunler[document.getElementById('urun').value].tip === 'm2') ? 'block' : 'none'; }
-    function teklifEkle() {
-        let u = db.urunler[document.getElementById('urun').value];
-        let en = parseFloat(document.getElementById('en').value)||0, boy = parseFloat(document.getElementById('boy').value)||0, adet = parseInt(document.getElementById('adet').value)||1;
-        let fiyat = (u.tip === 'm2') ? ((en*boy/10000)*u.fiyat*adet) : (u.fiyat*adet);
-        db.teklifler.push({ad:u.ad, fiyat:fiyat}); save(); renderTeklif();
+    function urunEkle() {
+        db.u.push({ad:document.getElementById('uAd').value, f:parseFloat(document.getElementById('uFiyat').value), t:document.getElementById('uTip').value});
+        kaydet();
     }
-    function renderTeklif() {
-        let l = document.getElementById('teklif-liste'), t=0; l.innerHTML='';
-        db.teklifler.forEach((v,i) => {
-            l.innerHTML += `<div class="item-row"><span>${v.ad}</span><span>${v.fiyat.toLocaleString()} TL <span class="delete-btn" onclick="silTeklif(${i})">X</span></span></div>`;
-            t += v.fiyat;
-        });
-        document.getElementById('toplam').innerText = 'Toplam: ' + t.toLocaleString() + ' TL';
+    function musteriEkle() {
+        db.m.push({ad:document.getElementById('mAd').value});
+        kaydet();
     }
-    function silTeklif(i) { db.teklifler.splice(i,1); save(); renderTeklif(); }
-
-    // MÜŞTERİ & BORÇ
-    function yeniMusteri() { let isim = prompt("İsim:"); if(isim) { db.musteriler.push({isim, bakiye:0}); save(); location.reload(); } }
-    function yeniBorc() { let acik = prompt("Açıklama:"), tutar = parseFloat(prompt("Tutar:")); if(acik) { db.borclar.push({acik, tutar}); save(); location.reload(); } }
-    function silBorc(i) { db.borclar.splice(i,1); save(); location.reload(); }
-
-    function save() { localStorage.setItem('umutData', JSON.stringify(db)); }
-
-    // RENDER
-    function init() {
-        db.urunler.forEach((u,i) => document.getElementById('urun').innerHTML += `<option value="${i}">${u.ad}</option>`);
-        db.borclar.forEach((b,i) => document.getElementById('borc-liste').innerHTML += `<div class="item-row"><span>${b.acik}</span><span>${b.tutar.toLocaleString()} TL <span class="delete-btn" onclick="silBorc(${i})">X</span></span></div>`);
-        renderTeklif();
+    function borcEkle() {
+        db.b.push({a:document.getElementById('bAcik').value, t:document.getElementById('bTutar').value});
+        kaydet();
     }
-    init();
+    function kaydet() { localStorage.setItem('umutData', JSON.stringify(db)); location.reload(); }
+
+    // Listeleri çiz
+    db.u.forEach(i => document.getElementById('urunSec').innerHTML += `<option>${i.ad} (${i.f} TL)</option>`);
+    db.m.forEach(i => document.getElementById('mListe').innerHTML += `<div class="row">${i.ad}</div>`);
+    db.b.forEach((i, idx) => document.getElementById('bListe').innerHTML += `<div class="row">${i.a} - ${i.t} TL <span onclick="db.b.splice(${idx},1); kaydet()" style="cursor:pointer">❌</span></div>`);
 </script>
 </body>
 </html>
