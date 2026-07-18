@@ -6,45 +6,31 @@
     <title>Dijital Turgut - Yönetim</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0fdf4; }
-        .card { padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .tab-teklif { background-color: #dcfce7; border-left: 5px solid #059669; }
-        .tab-musteri { background-color: #dbeafe; border-left: 5px solid #2563eb; }
-        .tab-gider { background-color: #ffedd5; border-left: 5px solid #ea580c; }
-        .nav-btn { padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; margin: 2px; }
+        .tab-box { display: flex; gap: 5px; margin-bottom: 20px; }
+        .nav-btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; color: white; }
+        .card { padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .teklif-color { background: #dcfce7; border-left: 6px solid #059669; }
+        .musteri-color { background: #dbeafe; border-left: 6px solid #2563eb; }
+        .borc-color { background: #ffedd5; border-left: 6px solid #ea580c; }
     </style>
 </head>
 <body>
 
-<!-- Sekme Menüsü -->
-<div style="display:flex; margin-bottom: 20px;">
-    <button class="nav-btn" onclick="openTab('teklif')">Teklif</button>
-    <button class="nav-btn" onclick="openTab('musteri')">Müşteriler</button>
-    <button class="nav-btn" onclick="openTab('gider')">Giderler</button>
+<div class="tab-box">
+    <button class="nav-btn" style="background:#059669" onclick="show('teklif')">Teklif</button>
+    <button class="nav-btn" style="background:#2563eb" onclick="show('musteri')">Müşteriler</button>
+    <button class="nav-btn" style="background:#ea580c" onclick="show('borc')">Borçlarım</button>
 </div>
 
-<!-- 1. Teklif Ekranı -->
-<div id="teklif" class="card tab-teklif">
-    <h2>Teklif Hazırlama</h2>
-    <p>Burada eskisi gibi hesaplama yapabilirsin.</p>
-</div>
-
-<!-- 2. Müşteri Ekranı -->
-<div id="musteri" class="card tab-musteri" style="display:none;">
-    <h2>Müşterilerim</h2>
-    <button onclick="alert('Müşteri ekleme özelliği yakında gelecek')">+ Müşteri Ekle</button>
-</div>
-
-<!-- 3. Giderler Ekranı -->
-<div id="gider" class="card tab-gider" style="display:none;">
-    <h2>Gider ve Borçlar</h2>
-    <p>Kira ve borçlarını buradan takip edeceksin.</p>
-</div>
+<div id="teklif" class="card teklif-color"><h2>Teklif Hazırlama</h2><p>Hesaplamalar burada...</p></div>
+<div id="musteri" class="card musteri-color" style="display:none;"><h2>Müşterilerim</h2><p>Müşteri kartları burada...</p></div>
+<div id="borc" class="card borc-color" style="display:none;"><h2>Borçlarım</h2><p>Gider ve kira takibi burada...</p></div>
 
 <script>
-    function openTab(tabName) {
-        document.getElementById('teklif').style.display = (tabName === 'teklif') ? 'block' : 'none';
-        document.getElementById('musteri').style.display = (tabName === 'musteri') ? 'block' : 'none';
-        document.getElementById('gider').style.display = (tabName === 'gider') ? 'block' : 'none';
+    function show(id) {
+        document.getElementById('teklif').style.display = (id === 'teklif') ? 'block' : 'none';
+        document.getElementById('musteri').style.display = (id === 'musteri') ? 'block' : 'none';
+        document.getElementById('borc').style.display = (id === 'borc') ? 'block' : 'none';
     }
 </script>
 </body>
