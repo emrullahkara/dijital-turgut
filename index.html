@@ -1,19 +1,54 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijital Turgut - Profesyonel</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 10px; }
+        
+        /* Sekme Renkleri */
+        .tab-teklif { background-color: #dcfce7; border-left: 5px solid #059669; } /* Yeşil */
+        .tab-musteri { background-color: #dbeafe; border-left: 5px solid #2563eb; } /* Mavi */
+        .tab-gider { background-color: #ffedd5; border-left: 5px solid #ea580c; } /* Turuncu */
+        
+        .card { padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .nav-btn { padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; margin: 2px; }
+    </style>
+</head>
+<body>
+
 <!-- Sekme Menüsü -->
-<div class="card" style="display:flex; justify-content: space-around;">
-    <button onclick="showTab('teklif')">Teklif</button>
-    <button onclick="showTab('musteri')">Müşteriler</button>
-    <button onclick="showTab('borclar')">Borçlarım</button>
+<div style="display:flex; margin-bottom: 20px;">
+    <button class="nav-btn" onclick="openTab('teklif')">Teklif</button>
+    <button class="nav-btn" onclick="openTab('musteri')">Müşteriler</button>
+    <button class="nav-btn" onclick="openTab('gider')">Giderler</button>
 </div>
 
-<!-- Sekme İçerikleri -->
-<div id="teklif-tab"> ... (Eski hesap makinen buraya gelecek) ... </div>
-<div id="musteri-tab" style="display:none;"> ... (Müşteri listesi buraya gelecek) ... </div>
-<div id="borclar-tab" style="display:none;"> ... (Borçlu olduğumuz yerler buraya gelecek) ... </div>
+<!-- Teklif Ekranı -->
+<div id="teklif" class="card tab-teklif">
+    <h2>Teklif Hazırlama</h2>
+    <p>Hesaplamalar burada olacak...</p>
+</div>
+
+<!-- Müşteri Ekranı -->
+<div id="musteri" class="card tab-musteri" style="display:none;">
+    <h2>Müşterilerim</h2>
+    <p>Burada müşteri kartları listelenecek...</p>
+</div>
+
+<!-- Giderler Ekranı -->
+<div id="gider" class="card tab-gider" style="display:none;">
+    <h2>Gider ve Borçlar</h2>
+    <p>Kira, fatura ve tedarikçi borçları burada...</p>
+</div>
 
 <script>
-    function showTab(tab) {
-        document.getElementById('teklif-tab').style.display = (tab === 'teklif') ? 'block' : 'none';
-        document.getElementById('musteri-tab').style.display = (tab === 'musteri') ? 'block' : 'none';
-        document.getElementById('borclar-tab').style.display = (tab === 'borclar') ? 'block' : 'none';
+    function openTab(tabName) {
+        document.getElementById('teklif').style.display = (tabName === 'teklif') ? 'block' : 'none';
+        document.getElementById('musteri').style.display = (tabName === 'musteri') ? 'block' : 'none';
+        document.getElementById('gider').style.display = (tabName === 'gider') ? 'block' : 'none';
     }
 </script>
+</body>
+</html>
