@@ -2,63 +2,81 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dijital Emrullah</title>
     <style>
-        body { font-family: sans-serif; padding: 10px; }
-        .input-group { display: grid; gap: 10px; margin-bottom: 20px; }
-        input, select, button { padding: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
-        .summary { font-weight: bold; margin-top: 20px; padding: 10px; background: #f4f4f4; }
+        :root { --primary: #6366f1; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 15px; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1e293b; }
+        .form-control { margin-bottom: 15px; }
+        label { display: block; font-size: 14px; margin-bottom: 5px; color: #64748b; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .list-item { border-bottom: 1px solid #f1f5f9; padding: 10px 0; display: flex; justify-content: space-between; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<h2>Dijital Emrullah</h2>
+<div class="card">
+    <h2>Dijital Emrullah</h2>
+    <div class="form-control">
+        <label>Ürün Seçimi</label>
+        <select id="urun" onchange="toggleInputs()">
+            <option value="1500" data-tip="adet">Kapı Kasası (1500 TL)</option>
+            <option value="1500" data-tip="adet">Kapı Kanadı (1500 TL)</option>
+            <option value="2750" data-tip="adet">Kapı Kasa+Kanat (2750 TL)</option>
+            <option value="1500" data-tip="m2">Tek Yön Düz Mat (1500 TL/m2)</option>
+            <option value="1750" data-tip="m2">Tek Yön Çıtalı Mat (1750 TL/m2)</option>
+            <option value="3000" data-tip="m2">Tek Yön Düz Parlak (3000 TL/m2)</option>
+            <option value="3500" data-tip="m2">Tek Yön Çıtalı Parlak (3500 TL/m2)</option>
+            <option value="800" data-tip="adet">Sandalye Basit (800 TL)</option>
+            <option value="1250" data-tip="adet">Sandalye İşçilikli (1250 TL)</option>
+        </select>
+    </div>
+    
+    <div id="ebat-alan" class="form-control" style="display:none;">
+        <label>En x Boy (cm)</label>
+        <div style="display: flex; gap: 5px;">
+            <input type="number" id="en" placeholder="En">
+            <input type="number" id="boy" placeholder="Boy">
+        </div>
+    </div>
 
-<div class="input-group">
-    <select id="urun">
-        <option value="1500" data-tip="adet">Kapı Kasası (1500 TL)</option>
-        <option value="1500" data-tip="adet">Kapı Kanadı (1500 TL)</option>
-        <option value="2750" data-tip="adet">Kapı Kasa+Kanat (2750 TL)</option>
-        <option value="1500" data-tip="m2">Tek Yön Düz Mat (1500 TL)</option>
-        <option value="1750" data-tip="m2">Tek Yön Çıtalı Mat (1750 TL)</option>
-        <option value="3000" data-tip="m2">Tek Yön Düz Parlak (3000 TL)</option>
-        <option value="3500" data-tip="m2">Tek Yön Çıtalı Parlak (3500 TL)</option>
-        <option value="800" data-tip="adet">Sandalye Basit (800 TL)</option>
-        <option value="1250" data-tip="adet">Sandalye İşçilikli (1250 TL)</option>
-    </select>
-    <input type="number" id="en" placeholder="En (cm)">
-    <input type="number" id="boy" placeholder="Boy (cm)">
-    <input type="number" id="adet" placeholder="Adet" value="1">
-    <button onclick="hesapla()">Ekle</button>
+    <div class="form-control">
+        <label>Adet</label>
+        <input type="number" id="adet" value="1">
+    </div>
+    
+    <button onclick="hesapla()">Listeye Ekle</button>
 </div>
 
-<table>
-    <thead><tr><th>Ürün</th><th>En-Boy</th><th>M2</th><th>Fiyat</th></tr></thead>
-    <tbody id="liste"></tbody>
-</table>
-
-<div class="summary" id="toplam">
-    Toplam M2: 0 | Toplam Fiyat: 0 TL
+<div class="card" style="margin-top: 20px;">
+    <div id="liste"></div>
+    <hr>
+    <div id="toplam" style="font-weight: bold; text-align: right; font-size: 18px;"></div>
 </div>
 
 <script>
     let veriler = [];
 
+    function toggleInputs() {
+        const tip = document.getElementById('urun').options[document.getElementById('urun').selectedIndex].dataset.tip;
+        document.getElementById('ebat-alan').style.display = (tip === 'm2') ? 'block' : 'none';
+    }
+
     function hesapla() {
         const urunEl = document.getElementById('urun');
+        const tip = urunEl.options[urunEl.selectedIndex].dataset.tip;
         const en = parseFloat(document.getElementById('en').value) || 0;
         const boy = parseFloat(document.getElementById('boy').value) || 0;
         const adet = parseInt(document.getElementById('adet').value) || 1;
         const fiyatBirim = parseFloat(urunEl.value);
-        const tip = urunEl.options[urunEl.selectedIndex].dataset.tip;
 
         let m2 = (tip === 'm2') ? (en * boy) / 10000 : 0;
         let fiyat = (tip === 'm2') ? (m2 * fiyatBirim * adet) : (fiyatBirim * adet);
 
-        veriler.push({urun: urunEl.options[urunEl.selectedIndex].text, en, boy, m2, fiyat});
+        veriler.push({urun: urunEl.options[urunEl.selectedIndex].text, m2, fiyat});
         render();
     }
 
@@ -66,13 +84,11 @@
         const liste = document.getElementById('liste');
         liste.innerHTML = '';
         let tM2 = 0, tFiyat = 0;
-
         veriler.forEach(v => {
-            liste.innerHTML += `<tr><td>${v.urun}</td><td>${v.en}x${v.boy}</td><td>${v.m2.toFixed(2)}</td><td>${v.fiyat}</td></tr>`;
-            tM2 += v.m2;
-            tFiyat += v.fiyat;
+            liste.innerHTML += `<div class="list-item"><span>${v.urun}</span><span>${v.fiyat.toLocaleString()} TL</span></div>`;
+            tM2 += v.m2; tFiyat += v.fiyat;
         });
-        document.getElementById('toplam').innerText = `Toplam M2: ${tM2.toFixed(2)} | Toplam Fiyat: ${tFiyat} TL`;
+        document.getElementById('toplam').innerText = `Toplam: ${tFiyat.toLocaleString()} TL`;
     }
 </script>
 </body>
