@@ -9,7 +9,7 @@
         .tab-box { display: flex; gap: 5px; margin-bottom: 20px; }
         .nav-btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; color: white; }
         .musteri-color { border-left: 6px solid #2563eb; background: #dbeafe; }
-        .hareket-item { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 8px 0; font-size: 14px; }
+        .hareket-item { display: flex; justify-content: space-between; border-bottom: 1px solid #aaa; padding: 10px 0; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -27,7 +27,7 @@
 </div>
 
 <div id="detay-ekran" class="card musteri-color" style="display:none;">
-    <button onclick="location.reload()" style="margin-bottom:10px;">&larr; Geri Dön</button>
+    <button onclick="location.reload()" style="margin-bottom:15px; padding:5px 10px;">&larr; Geri Dön</button>
     <h2 id="detay-isim">Müşteri</h2>
     <p>Güncel Bakiye: <b id="detay-bakiye">0 TL</b></p>
     <button onclick="islemYap('borc')" style="background:#dc2626; color:white; border:none; padding:10px; border-radius:5px;">Borç Ekle</button>
@@ -52,7 +52,7 @@
         let liste = document.getElementById('musteri-listesi');
         liste.innerHTML = '';
         musteriler.forEach((m, i) => {
-            liste.innerHTML += `<div onclick="detayaGit(${i})" style="padding:10px; border-bottom:1px solid #ccc; cursor:pointer;">${m.isim} - <b>${m.bakiye} TL</b></div>`;
+            liste.innerHTML += `<div onclick="detayaGit(${i})" style="padding:15px; border-bottom:1px solid #ccc; cursor:pointer;">${m.isim} - <b>${m.bakiye} TL</b></div>`;
         });
     }
 
@@ -65,8 +65,11 @@
         
         let liste = document.getElementById('hareket-listesi');
         liste.innerHTML = '<h3>Hareket Geçmişi</h3>';
-        (musteriler[i].islemler || []).forEach(islem => {
-            liste.innerHTML += `<div class="hareket-item"><span>${islem.tarih}</span> <span>${islem.tur}: ${islem.tutar} TL</span></div>`;
+        
+        // islemler yoksa boş dizi olarak varsay
+        let islemler = musteriler[i].islemler || [];
+        islemler.forEach(islem => {
+            liste.innerHTML += `<div class="hareket-item"><span>${islem.tarih}</span> <span><b>${islem.tur}:</b> ${islem.tutar} TL</span></div>`;
         });
     }
 
@@ -74,6 +77,8 @@
         let tutar = parseFloat(prompt("Tutar girin:"));
         if (tutar) {
             let tarih = new Date().toLocaleDateString('tr-TR');
+            if (!musteriler[seciliIndex].islemler) musteriler[seciliIndex].islemler = [];
+            
             if (tur === 'borc') {
                 musteriler[seciliIndex].bakiye += tutar;
             } else {
