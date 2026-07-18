@@ -5,49 +5,83 @@
     <title>UMUT POLYESTER - İş Yönetimi</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0fdf4; }
-        .card { padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card { padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: white; }
         .tab-box { display: flex; gap: 5px; margin-bottom: 20px; }
         .nav-btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; color: white; }
-        .musteri-color { background: #dbeafe; border-left: 6px solid #2563eb; }
+        .teklif-color { border-left: 6px solid #059669; background: #dcfce7; }
+        .musteri-color { border-left: 6px solid #2563eb; background: #dbeafe; }
+        .borc-color { border-left: 6px solid #ea580c; background: #ffedd5; }
     </style>
 </head>
 <body>
 
-<div class="tab-box">
-    <button class="nav-btn" style="background:#059669" onclick="location.reload()">Ana Menü</button>
+<!-- Ana Menü -->
+<div id="ana-menu">
+    <div class="tab-box">
+        <button class="nav-btn" style="background:#059669" onclick="alert('Teklif yakında')">Teklif</button>
+        <button class="nav-btn" style="background:#2563eb" onclick="showSection('musteri-bolumu')">Müşteriler</button>
+        <button class="nav-btn" style="background:#ea580c" onclick="alert('Borçlar yakında')">Borçlarım</button>
+    </div>
+
+    <!-- Müşteri Bölümü -->
+    <div id="musteri-bolumu" class="card musteri-color">
+        <h2>Müşterilerim</h2>
+        <button onclick="yeniMusteriEkle()" style="width:100%; padding:10px; background:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer;">+ Müşteri Ekle</button>
+        <div id="musteri-listesi" style="margin-top:15px;"></div>
+    </div>
 </div>
 
-<!-- Müşteri Detay Ekranı -->
-<div id="detay-ekran" class="card musteri-color">
-    <h2 id="detay-isim">Müşteri İsmi</h2>
-    <p>Güncel Bakiye: <b id="detay-bakiye">0 TL</b></p>
-    <hr>
-    <button onclick="islemEkle('borc')" style="background:#dc2626; color:white; border:none; padding:10px; border-radius:5px;">Borç Ekle</button>
-    <button onclick="islemEkle('tahsilat')" style="background:#059669; color:white; border:none; padding:10px; border-radius:5px;">Tahsilat Ekle</button>
-    <div id="hareket-listesi" style="margin-top:20px;"></div>
+<!-- Detay Ekranı (Başlangıçta gizli) -->
+<div id="detay-ekran" class="card musteri-color" style="display:none;">
+    <button onclick="location.reload()" style="margin-bottom:10px;">&larr; Geri Dön</button>
+    <h2 id="detay-isim">Müşteri</h2>
+    <p>Bakiye: <b id="detay-bakiye">0 TL</b></p>
+    <button onclick="islemYap('borc')" style="background:#dc2626; color:white; border:none; padding:10px; border-radius:5px;">Borç Ekle</button>
+    <button onclick="islemYap('tahsilat')" style="background:#059669; color:white; border:none; padding:10px; border-radius:5px;">Tahsilat Ekle</button>
 </div>
 
 <script>
-    // URL'den seçilen müşteri indeksini alalım (veya basitleştirelim)
-    let seciliIndex = localStorage.getItem('seciliIndex');
     let musteriler = JSON.parse(localStorage.getItem('musteriler')) || [];
-    let musteri = musteriler[seciliIndex];
+    let seciliIndex = null;
 
-    document.getElementById('detay-isim').innerText = musteri.isim;
-    document.getElementById('detay-bakiye').innerText = musteri.bakiye + " TL";
+    function showSection(id) { document.getElementById('ana-menu').style.display = 'block'; }
 
-    function islemEkle(tur) {
-        let tutar = prompt(tur === 'borc' ? "Borç tutarını girin:" : "Tahsilat tutarını girin:");
+    function yeniMusteriEkle() {
+        let isim = prompt("Müşteri ismi:");
+        if (isim) {
+            musteriler.push({ isim: isim, bakiye: 0 });
+            localStorage.setItem('musteriler', JSON.stringify(musteriler));
+            renderMusteriler();
+        }
+    }
+
+    function renderMusteriler() {
+        let liste = document.getElementById('musteri-listesi');
+        liste.innerHTML = '';
+        musteriler.forEach((m, i) => {
+            liste.innerHTML += `<div onclick="detayaGit(${i})" style="padding:10px; border-bottom:1px solid #ccc; cursor:pointer;">${m.isim} - ${m.bakiye} TL</div>`;
+        });
+    }
+
+    function detayaGit(i) {
+        seciliIndex = i;
+        document.getElementById('ana-menu').style.display = 'none';
+        document.getElementById('detay-ekran').style.display = 'block';
+        document.getElementById('detay-isim').innerText = musteriler[i].isim;
+        document.getElementById('detay-bakiye').innerText = musteriler[i].bakiye + " TL";
+    }
+
+    function islemYap(tur) {
+        let tutar = parseFloat(prompt("Tutar girin:"));
         if (tutar) {
-            tutar = parseFloat(tutar);
-            if (tur === 'borc') musteri.bakiye += tutar;
-            else musteri.bakiye -= tutar;
-            
-            musteriler[seciliIndex] = musteri;
+            if (tur === 'borc') musteriler[seciliIndex].bakiye += tutar;
+            else musteriler[seciliIndex].bakiye -= tutar;
             localStorage.setItem('musteriler', JSON.stringify(musteriler));
             location.reload();
         }
     }
+
+    renderMusteriler();
 </script>
 </body>
 </html>
