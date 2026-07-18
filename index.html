@@ -2,19 +2,18 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>UMUT POLYESTER - Profesyonel</title>
+    <title>UMUT POLYESTER - Yönetim</title>
     <style>
         body { font-family: sans-serif; padding: 10px; background: #fdfbf7; }
-        .tab { display: flex; gap: 5px; margin-bottom: 15px; }
-        .btn { padding: 10px; flex: 1; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; }
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        input, select { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; box-sizing: border-box; }
-        .row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #ccc; }
+        .btn { padding: 10px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; }
+        input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; box-sizing: border-box; }
+        .satir { border-bottom: 1px solid #eee; padding: 10px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
-<div class="tab">
+<div style="display:flex; gap:5px; margin-bottom:10px;">
     <button class="btn" style="background:#059669" onclick="goster('teklif')">Teklif</button>
     <button class="btn" style="background:#2563eb" onclick="goster('musteri')">Müşteriler</button>
     <button class="btn" style="background:#ea580c" onclick="goster('borc')">Borçlar</button>
@@ -24,31 +23,29 @@
 <div id="teklif" class="card">
     <h3>Teklif Hazırlama</h3>
     <select id="uSec"></select>
-    <div id="ebatPanel">
-        <input type="number" id="en" placeholder="En (cm)">
-        <input type="number" id="boy" placeholder="Boy (cm)">
-    </div>
+    <input type="number" id="en" placeholder="En (cm)">
+    <input type="number" id="boy" placeholder="Boy (cm)">
     <input type="number" id="adet" placeholder="Adet" value="1">
-    <button class="btn" style="background:#059669" onclick="ekle()">Listeye Ekle</button>
-    <div id="liste" style="margin-top:10px;"></div>
-    <div id="toplam" style="font-weight:bold; margin-top:10px; font-size:1.2em;">Toplam: 0 TL</div>
+    <button class="btn" style="background:#059669; width:100%" onclick="teklifEkle()">Listeye Ekle</button>
+    <div id="tListe" style="margin-top:10px;"></div>
+    <div id="tToplam" style="font-weight:bold; margin-top:10px;">Toplam: 0 TL</div>
 </div>
 
 <!-- MÜŞTERİ -->
 <div id="musteri" class="card" style="display:none;">
     <h3>Müşteri Ekle</h3>
-    <input id="mAd" placeholder="İsim">
-    <button class="btn" style="background:#2563eb" onclick="mEkle()">Müşteri Ekle</button>
-    <div id="mListe"></div>
+    <input id="mAd" placeholder="İsim Soyisim">
+    <button class="btn" style="background:#2563eb; width:100%" onclick="musteriEkle()">Müşteri Ekle</button>
+    <div id="mListe" style="margin-top:10px;"></div>
 </div>
 
 <!-- BORÇ -->
 <div id="borc" class="card" style="display:none;">
     <h3>Borç / Gider</h3>
     <input id="bAcik" placeholder="Açıklama">
-    <input id="bTutar" placeholder="Tutar">
-    <button class="btn" style="background:#ea580c" onclick="bEkle()">Borç Ekle</button>
-    <div id="bListe"></div>
+    <input id="bTutar" type="number" placeholder="Tutar">
+    <button class="btn" style="background:#ea580c; width:100%" onclick="borcEkle()">Borç Ekle</button>
+    <div id="bListe" style="margin-top:10px;"></div>
 </div>
 
 <script>
@@ -63,34 +60,39 @@
         document.getElementById('borc').style.display = id=='borc'?'block':'none';
     }
 
-    function ekle() {
-        let u = db.urunler[document.getElementById('uSec').selectedIndex];
-        let adet = parseInt(document.getElementById('adet').value);
-        let fiyat = 0;
+    function render() {
+        // Liste temizle
+        document.getElementById('tListe').innerHTML = "";
+        document.getElementById('mListe').innerHTML = "";
+        document.getElementById('bListe').innerHTML = "";
         
-        if(u.t == 'm2') {
-            let m2 = (parseFloat(document.getElementById('en').value) * parseFloat(document.getElementById('boy').value)) / 10000;
-            fiyat = m2 * u.f * adet;
-        } else {
-            fiyat = u.f * adet;
-        }
+        let tGenel = 0;
+        db.t.forEach((item, i) => {
+            document.getElementById('tListe').innerHTML += `<div class="satir">${item.ad} | ${item.f.toLocaleString()} TL <span onclick="sil('t',${i})" style="cursor:pointer">❌</span></div>`;
+            tGenel += item.f;
+        });
+        db.m.forEach((item, i) => document.getElementById('mListe').innerHTML += `<div class="satir">${item.ad} <span onclick="sil('m',${i})" style="cursor:pointer">❌</span></div>`);
+        db.b.forEach((item, i) => document.getElementById('bListe').innerHTML += `<div class="satir">${item.a} | ${item.t} TL <span onclick="sil('b',${i})" style="cursor:pointer">❌</span></div>`);
         
-        db.t.push({ad: u.ad, f: fiyat});
-        localStorage.setItem('umutData', JSON.stringify(db));
-        location.reload();
+        document.getElementById('tToplam').innerText = "Toplam: " + tGenel.toLocaleString() + " TL";
     }
 
-    function mEkle() { db.m.push({ad: document.getElementById('mAd').value}); localStorage.setItem('umutData', JSON.stringify(db)); location.reload(); }
-    function bEkle() { db.b.push({a: document.getElementById('bAcik').value, t: document.getElementById('bTutar').value}); localStorage.setItem('umutData', JSON.stringify(db)); location.reload(); }
+    function teklifEkle() {
+        let u = db.urunler[document.getElementById('uSec').selectedIndex];
+        let adet = parseFloat(document.getElementById('adet').value) || 1;
+        let fiyat = (u.t == 'm2') ? ((parseFloat(document.getElementById('en').value) * parseFloat(document.getElementById('boy').value))/10000) * u.f * adet : u.f * adet;
+        db.t.push({ad: u.ad, f: fiyat});
+        save();
+    }
 
-    // Listeleri Doldur
-    db.urunler.forEach(u => document.getElementById('uSec').innerHTML += `<option>${u.ad} (${u.t})</option>`);
-    db.t.forEach(t => document.getElementById('liste').innerHTML += `<div class="row"><span>${t.ad}</span><span>${t.f.toLocaleString()} TL</span></div>`);
-    db.m.forEach(m => document.getElementById('mListe').innerHTML += `<div class="row">${m.ad}</div>`);
-    db.b.forEach(b => document.getElementById('bListe').innerHTML += `<div class="row">${b.a} - ${b.t} TL</div>`);
-    
-    let genToplam = 0; db.t.forEach(t => genToplam += t.f);
-    document.getElementById('toplam').innerText = "Toplam: " + genToplam.toLocaleString() + " TL";
+    function musteriEkle() { db.m.push({ad: document.getElementById('mAd').value}); save(); }
+    function borcEkle() { db.b.push({a: document.getElementById('bAcik').value, t: document.getElementById('bTutar').value}); save(); }
+    function sil(k, i) { db[k].splice(i,1); save(); }
+    function save() { localStorage.setItem('umutData', JSON.stringify(db)); render(); }
+
+    // Başlat
+    db.urunler.forEach(u => document.getElementById('uSec').innerHTML += `<option>${u.ad}</option>`);
+    render();
 </script>
 </body>
 </html>
