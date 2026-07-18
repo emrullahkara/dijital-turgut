@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijital Turgut - Profesyonel</title>
+    <title>Dijital Turgut - Yönetim</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 10px; }
-        
-        /* Sekme Renkleri */
-        .tab-teklif { background-color: #dcfce7; border-left: 5px solid #059669; } /* Yeşil */
-        .tab-musteri { background-color: #dbeafe; border-left: 5px solid #2563eb; } /* Mavi */
-        .tab-gider { background-color: #ffedd5; border-left: 5px solid #ea580c; } /* Turuncu */
-        
+        body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0fdf4; }
         .card { padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .tab-teklif { background-color: #dcfce7; border-left: 5px solid #059669; }
+        .tab-musteri { background-color: #dbeafe; border-left: 5px solid #2563eb; }
+        .tab-gider { background-color: #ffedd5; border-left: 5px solid #ea580c; }
         .nav-btn { padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; margin: 2px; }
     </style>
 </head>
@@ -25,22 +22,22 @@
     <button class="nav-btn" onclick="openTab('gider')">Giderler</button>
 </div>
 
-<!-- Teklif Ekranı -->
+<!-- 1. Teklif Ekranı -->
 <div id="teklif" class="card tab-teklif">
     <h2>Teklif Hazırlama</h2>
-    <p>Hesaplamalar burada olacak...</p>
+    <p>Burada eskisi gibi hesaplama yapabilirsin.</p>
 </div>
 
-<!-- Müşteri Ekranı -->
+<!-- 2. Müşteri Ekranı -->
 <div id="musteri" class="card tab-musteri" style="display:none;">
     <h2>Müşterilerim</h2>
-    <p>Burada müşteri kartları listelenecek...</p>
+    <button onclick="alert('Müşteri ekleme özelliği yakında gelecek')">+ Müşteri Ekle</button>
 </div>
 
-<!-- Giderler Ekranı -->
+<!-- 3. Giderler Ekranı -->
 <div id="gider" class="card tab-gider" style="display:none;">
     <h2>Gider ve Borçlar</h2>
-    <p>Kira, fatura ve tedarikçi borçları burada...</p>
+    <p>Kira ve borçlarını buradan takip edeceksin.</p>
 </div>
 
 <script>
