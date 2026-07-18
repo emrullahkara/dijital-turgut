@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijital Turgut - Yönetim</title>
+    <title>Turgut Yönetim</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0fdf4; }
         .tab-box { display: flex; gap: 5px; margin-bottom: 20px; }
@@ -22,16 +22,58 @@
     <button class="nav-btn" style="background:#ea580c" onclick="show('borc')">Borçlarım</button>
 </div>
 
-<div id="teklif" class="card teklif-color"><h2>Teklif Hazırlama</h2><p>Hesaplamalar burada...</p></div>
-<div id="musteri" class="card musteri-color" style="display:none;"><h2>Müşterilerim</h2><p>Müşteri kartları burada...</p></div>
-<div id="borc" class="card borc-color" style="display:none;"><h2>Borçlarım</h2><p>Gider ve kira takibi burada...</p></div>
+<!-- 1. Teklif -->
+<div id="teklif" class="card teklif-color">
+    <h2>Teklif Hazırlama</h2>
+    <p>Hesaplamalar buraya eklenecek...</p>
+</div>
+
+<!-- 2. Müşteriler -->
+<div id="musteri" class="card musteri-color" style="display:none;">
+    <h2>Müşterilerim</h2>
+    <button onclick="yeniMusteriEkle()" style="width:100%; padding:12px; background:#2563eb; color:white; border:none; border-radius:8px; margin-bottom:10px; font-weight:bold;">+ Müşteri Ekle</button>
+    <div id="musteri-listesi"></div>
+</div>
+
+<!-- 3. Borçlar -->
+<div id="borc" class="card borc-color" style="display:none;">
+    <h2>Borçlarım</h2>
+    <p>Gider ve kira takibi buraya eklenecek...</p>
+</div>
 
 <script>
+    // Müşteri verilerini tutan liste
+    let musteriler = JSON.parse(localStorage.getItem('musteriler')) || [];
+
     function show(id) {
         document.getElementById('teklif').style.display = (id === 'teklif') ? 'block' : 'none';
         document.getElementById('musteri').style.display = (id === 'musteri') ? 'block' : 'none';
         document.getElementById('borc').style.display = (id === 'borc') ? 'block' : 'none';
     }
+
+    function yeniMusteriEkle() {
+        let isim = prompt("Müşteri ismi girin:");
+        if (isim) {
+            musteriler.push({ id: Date.now(), isim: isim, bakiye: 0 });
+            localStorage.setItem('musteriler', JSON.stringify(musteriler));
+            listeyiGuncelle();
+        }
+    }
+
+    function listeyiGuncelle() {
+        let listeDiv = document.getElementById('musteri-listesi');
+        listeDiv.innerHTML = '';
+        musteriler.forEach(m => {
+            listeDiv.innerHTML += `
+                <div style="background:white; padding:15px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                    <span><b>${m.isim}</b></span>
+                    <span>${m.bakiye} TL</span>
+                </div>`;
+        });
+    }
+
+    // Sayfa açıldığında müşteri listesini otomatik yükle
+    listeyiGuncelle();
 </script>
 </body>
 </html>
