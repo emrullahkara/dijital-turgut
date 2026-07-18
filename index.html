@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dijital Emrullah</title>
+    <title>Dijital Turgut</title>
     <style>
         :root { --primary: #6366f1; --bg: #f8fafc; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 15px; }
@@ -12,14 +12,14 @@
         .form-control { margin-bottom: 15px; }
         label { display: block; font-size: 14px; margin-bottom: 5px; color: #64748b; }
         input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .list-item { border-bottom: 1px solid #f1f5f9; padding: 10px 0; display: flex; justify-content: space-between; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Dijital Emrullah</h2>
+    <h2>Dijital Turgut</h2>
     <div class="form-control">
         <label>Ürün Seçimi</label>
         <select id="urun" onchange="toggleInputs()">
@@ -53,8 +53,7 @@
 
 <div class="card" style="margin-top: 20px;">
     <div id="liste"></div>
-    <hr>
-    <div id="toplam" style="font-weight: bold; text-align: right; font-size: 18px;"></div>
+    <div id="toplam" style="margin-top: 15px; font-weight: bold; text-align: right; font-size: 18px; color: var(--primary);"></div>
 </div>
 
 <script>
@@ -83,10 +82,10 @@
     function render() {
         const liste = document.getElementById('liste');
         liste.innerHTML = '';
-        let tM2 = 0, tFiyat = 0;
+        let tFiyat = 0;
         veriler.forEach(v => {
             liste.innerHTML += `<div class="list-item"><span>${v.urun}</span><span>${v.fiyat.toLocaleString()} TL</span></div>`;
-            tM2 += v.m2; tFiyat += v.fiyat;
+            tFiyat += v.fiyat;
         });
         document.getElementById('toplam').innerText = `Toplam: ${tFiyat.toLocaleString()} TL`;
     }
