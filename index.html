@@ -6,21 +6,21 @@
     <title>Dijital Turgut</title>
     <style>
         :root { --primary: #059669; --bg-overlay: rgba(255, 255, 255, 0.9); }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; padding: 15px; 
-            background: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') no-repeat center center fixed; 
-            background-size: cover;
-            min-height: 100vh;
-        }
-        .card { background: var(--bg-overlay); padding: 20px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); backdrop-filter: blur(10px); }
-        h2 { text-align: center; color: #064e3b; margin-top: 0; }
-        .form-control { margin-bottom: 15px; }
-        label { display: block; font-size: 14px; margin-bottom: 5px; color: #374151; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 12px; box-sizing: border-box; background: rgba(255,255,255,0.7); }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:active { transform: scale(0.98); }
-        .list-item { border-bottom: 1px solid #d1d5db; padding: 10px 0; display: flex; justify-content: space-between; font-size: 14px; color: #111827; }
+        body { font-family: sans-serif; margin: 0; padding: 10px; 
+               background: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80') no-repeat center center fixed; 
+               background-size: cover; min-height: 100vh; }
+        .card { background: var(--bg-overlay); padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); backdrop-filter: blur(8px); margin-bottom: 15px; }
+        h2 { text-align: center; color: #064e3b; margin: 0 0 15px 0; font-size: 1.2rem; }
+        .form-control { margin-bottom: 10px; }
+        label { font-size: 12px; color: #374151; font-weight: 600; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; background: rgba(255,255,255,0.7); }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; }
+        
+        .liste-container { font-size: 13px; }
+        .item-row { border-bottom: 1px solid #ccc; padding: 8px 0; }
+        .item-header { font-weight: bold; color: #064e3b; margin-bottom: 3px; }
+        .item-details { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; color: #333; }
+        .toplam-alan { font-weight: bold; text-align: right; font-size: 16px; margin-top: 10px; color: #064e3b; }
     </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
 <div class="card">
     <h2>Dijital Turgut</h2>
     <div class="form-control">
-        <label>Ürün Seçimi</label>
+        <label>Ürün</label>
         <select id="urun" onchange="toggleInputs()">
             <option value="1500" data-tip="adet">Kapı Kasası (1500 TL)</option>
             <option value="1500" data-tip="adet">Kapı Kanadı (1500 TL)</option>
@@ -54,24 +54,20 @@
         <label>Adet</label>
         <input type="number" id="adet" value="1">
     </div>
-    
     <button onclick="hesapla()">Listeye Ekle</button>
 </div>
 
-<div class="card" style="margin-top: 20px;">
+<div class="card liste-container">
     <div id="liste"></div>
-    <div id="toplam" style="margin-top: 15px; font-weight: bold; text-align: right; font-size: 18px; color: var(--primary);"></div>
+    <div id="toplam" class="toplam-alan">Toplam: 0 TL</div>
 </div>
 
 <script>
     let veriler = [];
-
     function toggleInputs() {
-        const urun = document.getElementById('urun');
-        const tip = urun.options[urun.selectedIndex].dataset.tip;
+        const tip = document.getElementById('urun').options[document.getElementById('urun').selectedIndex].dataset.tip;
         document.getElementById('ebat-alan').style.display = (tip === 'm2') ? 'block' : 'none';
     }
-
     function hesapla() {
         const urunEl = document.getElementById('urun');
         const tip = urunEl.options[urunEl.selectedIndex].dataset.tip;
@@ -80,19 +76,24 @@
         const adet = parseInt(document.getElementById('adet').value) || 1;
         const fiyatBirim = parseFloat(urunEl.value);
 
-        let m2 = (tip === 'm2') ? (en * boy) / 10000 : 0;
-        let fiyat = (tip === 'm2') ? (m2 * fiyatBirim * adet) : (fiyatBirim * adet);
+        let m2 = (tip === 'm2') ? ((en * boy) / 10000) * adet : 0;
+        let fiyat = (tip === 'm2') ? (m2 * fiyatBirim) : (fiyatBirim * adet);
 
-        veriler.push({urun: urunEl.options[urunEl.selectedIndex].text, fiyat: fiyat});
+        veriler.push({urun: urunEl.options[urunEl.selectedIndex].text, en, boy, m2, fiyat});
         render();
     }
-
     function render() {
         const liste = document.getElementById('liste');
         liste.innerHTML = '';
         let tFiyat = 0;
         veriler.forEach(v => {
-            liste.innerHTML += `<div class="list-item"><span>${v.urun}</span><span>${v.fiyat.toLocaleString()} TL</span></div>`;
+            liste.innerHTML += `
+                <div class="item-row">
+                    <div class="item-header">${v.urun}</div>
+                    <div class="item-details">
+                        <span>E:${v.en||'-'}</span><span>B:${v.boy||'-'}</span><span>M²:${v.m2.toFixed(2)}</span><span>${v.fiyat.toLocaleString()} TL</span>
+                    </div>
+                </div>`;
             tFiyat += v.fiyat;
         });
         document.getElementById('toplam').innerText = `Toplam: ${tFiyat.toLocaleString()} TL`;
