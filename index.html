@@ -6,94 +6,88 @@
     <style>
         body { font-family: sans-serif; margin: 0; padding: 10px; background: #f0fdf4; }
         .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .tab-box { display: flex; gap: 5px; margin-bottom: 20px; }
         .nav-btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex: 1; color: white; }
-        .item-row { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        .item-row { border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        .delete-btn { color: red; cursor: pointer; font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
 
-<div class="tab-box">
+<div style="display:flex; gap:5px; margin-bottom:15px;">
     <button class="nav-btn" style="background:#059669" onclick="show('teklif')">Teklif</button>
     <button class="nav-btn" style="background:#2563eb" onclick="show('musteri')">Müşteriler</button>
     <button class="nav-btn" style="background:#ea580c" onclick="show('borc')">Borçlar</button>
 </div>
 
-<!-- 1. TEKLİF -->
+<!-- TEKLİF -->
 <div id="teklif" class="card">
-    <h2>Teklif Hazırlama</h2>
+    <h2>Teklif <span onclick="toggleAyarlar()" style="cursor:pointer">⚙️</span></h2>
+    <div id="ayarlar-paneli" style="display:none; background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:10px;">
+        <textarea id="urunJSON" style="width:100%; height:80px; font-size:11px;"></textarea>
+        <button onclick="ayarlariKaydet()" style="width:100%; background:#064e3b; color:white; border:none; padding:5px;">Kaydet</button>
+    </div>
     <select id="urun" onchange="toggleInputs()"></select>
-    <div id="ebat-alan" style="display:none; margin-top:10px;">
+    <div id="ebat-alan" style="display:none; margin:10px 0;">
         <input type="number" id="en" placeholder="En (cm)">
         <input type="number" id="boy" placeholder="Boy (cm)">
     </div>
-    <input type="number" id="adet" value="1" style="margin:10px 0;">
-    <button onclick="listeyeEkle()" style="background:#059669; color:white; border:none; padding:10px; width:100%; border-radius:8px;">Listeye Ekle</button>
-    <div id="liste" style="margin-top:10px;"></div>
+    <input type="number" id="adet" value="1" style="width:100%; padding:10px; box-sizing:border-box; margin:10px 0;">
+    <button onclick="teklifEkle()" style="width:100%; background:#059669; color:white; border:none; padding:12px;">Ekle</button>
+    <div id="teklif-liste"></div>
     <div id="toplam" style="font-weight:bold; margin-top:10px;">Toplam: 0 TL</div>
 </div>
 
-<!-- 2. MÜŞTERİLER -->
+<!-- MÜŞTERİ -->
 <div id="musteri" class="card" style="display:none;">
-    <h2>Müşterilerim</h2>
-    <button onclick="yeniMusteriEkle()" style="background:#2563eb; color:white; border:none; padding:10px; width:100%; border-radius:8px;">+ Müşteri Ekle</button>
-    <div id="musteri-listesi" style="margin-top:15px;"></div>
+    <h2>Müşteriler <button onclick="yeniMusteri()" style="background:#2563eb; color:white; border:none; padding:5px 10px; border-radius:5px;">+</button></h2>
+    <div id="musteri-liste"></div>
 </div>
 
-<!-- 3. BORÇLAR -->
+<!-- BORÇLAR -->
 <div id="borc" class="card" style="display:none;">
-    <h2>Gider / Borç Listesi</h2>
-    <button onclick="borcEkle()" style="background:#ea580c; color:white; border:none; padding:10px; width:100%; border-radius:8px;">+ Borç Ekle</button>
-    <div id="borc-listesi" style="margin-top:15px;"></div>
+    <h2>Giderler <button onclick="yeniBorc()" style="background:#ea580c; color:white; border:none; padding:5px 10px; border-radius:5px;">+</button></h2>
+    <div id="borc-liste"></div>
 </div>
 
 <script>
-    // Ortak Veri Yönetimi
-    let veriler = JSON.parse(localStorage.getItem('umutData')) || { musteriler: [], borclar: [], urunler: [{ad: "Kapı Kasası", fiyat: 1500, tip: "adet"}, {ad: "Tek Yön Düz Mat", fiyat: 1500, tip: "m2"}] };
+    let db = JSON.parse(localStorage.getItem('umutData')) || { musteriler:[], borclar:[], teklifler:[], urunler:[{ad:"Kapı Kasası", fiyat:1500, tip:"adet"}] };
 
     function show(id) {
-        document.getElementById('teklif').style.display = (id === 'teklif') ? 'block' : 'none';
-        document.getElementById('musteri').style.display = (id === 'musteri') ? 'block' : 'none';
-        document.getElementById('borc').style.display = (id === 'borc') ? 'block' : 'none';
+        ['teklif', 'musteri', 'borc'].forEach(s => document.getElementById(s).style.display = (s === id ? 'block' : 'none'));
     }
 
-    // TEKLİF MANTIĞI
-    function urunleriYukle() {
-        const select = document.getElementById('urun');
-        select.innerHTML = veriler.urunler.map((u, i) => `<option value="${i}">${u.ad} (${u.fiyat} TL)</option>`).join('');
+    // TEKLİF
+    function toggleAyarlar() { document.getElementById('ayarlar-paneli').style.display = 'block'; document.getElementById('urunJSON').value = JSON.stringify(db.urunler); }
+    function ayarlariKaydet() { db.urunler = JSON.parse(document.getElementById('urunJSON').value); save(); location.reload(); }
+    function toggleInputs() { document.getElementById('ebat-alan').style.display = (db.urunler[document.getElementById('urun').value].tip === 'm2') ? 'block' : 'none'; }
+    function teklifEkle() {
+        let u = db.urunler[document.getElementById('urun').value];
+        let en = parseFloat(document.getElementById('en').value)||0, boy = parseFloat(document.getElementById('boy').value)||0, adet = parseInt(document.getElementById('adet').value)||1;
+        let fiyat = (u.tip === 'm2') ? ((en*boy/10000)*u.fiyat*adet) : (u.fiyat*adet);
+        db.teklifler.push({ad:u.ad, fiyat:fiyat}); save(); renderTeklif();
     }
-
-    function toggleInputs() {
-        const u = veriler.urunler[document.getElementById('urun').value];
-        document.getElementById('ebat-alan').style.display = (u.tip === 'm2') ? 'block' : 'none';
+    function renderTeklif() {
+        let l = document.getElementById('teklif-liste'), t=0; l.innerHTML='';
+        db.teklifler.forEach((v,i) => {
+            l.innerHTML += `<div class="item-row"><span>${v.ad}</span><span>${v.fiyat.toLocaleString()} TL <span class="delete-btn" onclick="silTeklif(${i})">X</span></span></div>`;
+            t += v.fiyat;
+        });
+        document.getElementById('toplam').innerText = 'Toplam: ' + t.toLocaleString() + ' TL';
     }
+    function silTeklif(i) { db.teklifler.splice(i,1); save(); renderTeklif(); }
 
-    function listeyeEkle() {
-        const u = veriler.urunler[document.getElementById('urun').value];
-        const en = parseFloat(document.getElementById('en').value) || 0;
-        const boy = parseFloat(document.getElementById('boy').value) || 0;
-        const adet = parseInt(document.getElementById('adet').value) || 1;
-        let fiyat = (u.tip === 'm2') ? (((en * boy) / 10000) * u.fiyat * adet) : (u.fiyat * adet);
-        document.getElementById('liste').innerHTML += `<div class="item-row"><span>${u.ad}</span><span>${fiyat.toLocaleString()} TL</span></div>`;
-    }
+    // MÜŞTERİ & BORÇ
+    function yeniMusteri() { let isim = prompt("İsim:"); if(isim) { db.musteriler.push({isim, bakiye:0}); save(); location.reload(); } }
+    function yeniBorc() { let acik = prompt("Açıklama:"), tutar = parseFloat(prompt("Tutar:")); if(acik) { db.borclar.push({acik, tutar}); save(); location.reload(); } }
+    function silBorc(i) { db.borclar.splice(i,1); save(); location.reload(); }
 
-    // MÜŞTERİ VE BORÇ MANTIĞI
-    function yeniMusteriEkle() {
-        let isim = prompt("Müşteri ismi:");
-        if (isim) { veriler.musteriler.push({isim, bakiye: 0}); localStorage.setItem('umutData', JSON.stringify(veriler)); location.reload(); }
-    }
+    function save() { localStorage.setItem('umutData', JSON.stringify(db)); }
 
-    function borcEkle() {
-        let aciklama = prompt("Gider açıklaması:");
-        let tutar = parseFloat(prompt("Tutar:"));
-        if (aciklama && tutar) { veriler.borclar.push({aciklama, tutar, tarih: new Date().toLocaleDateString()}); localStorage.setItem('umutData', JSON.stringify(veriler)); location.reload(); }
-    }
-
-    // BAŞLAT
+    // RENDER
     function init() {
-        urunleriYukle();
-        document.getElementById('borc-listesi').innerHTML = veriler.borclar.map(b => `<div class="item-row"><span>${b.aciklama} (${b.tarih})</span><span>${b.tutar.toLocaleString()} TL</span></div>`).join('');
-        document.getElementById('musteri-listesi').innerHTML = veriler.musteriler.map(m => `<div class="item-row"><span>${m.isim}</span><span>0 TL</span></div>`).join('');
+        db.urunler.forEach((u,i) => document.getElementById('urun').innerHTML += `<option value="${i}">${u.ad}</option>`);
+        db.borclar.forEach((b,i) => document.getElementById('borc-liste').innerHTML += `<div class="item-row"><span>${b.acik}</span><span>${b.tutar.toLocaleString()} TL <span class="delete-btn" onclick="silBorc(${i})">X</span></span></div>`);
+        renderTeklif();
     }
     init();
 </script>
