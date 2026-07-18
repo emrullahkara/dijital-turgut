@@ -1,130 +1,19 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijital Turgut</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; padding: 10px; background: #eef7f0; }
-        .card { background: #dcfce7; padding: 15px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        h2 { text-align: center; color: #064e3b; margin: 0 0 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        .form-control { margin-bottom: 10px; }
-        label { font-size: 12px; font-weight: bold; color: #064e3b; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #bbf7d0; border-radius: 8px; box-sizing: border-box; background: white; }
-        button { width: 100%; padding: 12px; background: #059669; color: white; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
-        .item-row { border-bottom: 1px solid #bbf7d0; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-        .delete-btn { color: #dc2626; font-weight: bold; cursor: pointer; padding: 0 10px; }
-        .toplam-alan { font-weight: bold; font-size: 18px; text-align: right; margin-bottom: 15px; color: #064e3b; }
-        #ayarlar-paneli { display: none; margin-bottom: 15px; }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <h2>Dijital Turgut <span onclick="toggleAyarlar()" style="cursor:pointer">⚙️</span></h2>
-    
-    <div id="ayarlar-paneli">
-        <label>Fiyat Düzenle (Tümünü Kaydeder)</label>
-        <input type="text" id="fiyatListesi" value="1500,1500,2750,1500,1750,3000,3500,800,1250" placeholder="Virgülle ayırarak fiyatları yaz">
-        <button onclick="fiyatlariGuncelle()" style="background:#064e3b">Fiyatları Kaydet</button>
-    </div>
-
-    <div class="form-control">
-        <label>Ürün Seçimi</label>
-        <select id="urun"></select>
-    </div>
-    <div id="ebat-alan" class="form-control" style="display:none;">
-        <label>En x Boy (cm)</label>
-        <div style="display: flex; gap: 5px;">
-            <input type="number" id="en" placeholder="En">
-            <input type="number" id="boy" placeholder="Boy">
-        </div>
-    </div>
-    <div class="form-control">
-        <label>Adet</label>
-        <input type="number" id="adet" value="1">
-    </div>
-    <button onclick="hesapla()">Listeye Ekle</button>
+<!-- Sekme Menüsü -->
+<div class="card" style="display:flex; justify-content: space-around;">
+    <button onclick="showTab('teklif')">Teklif</button>
+    <button onclick="showTab('musteri')">Müşteriler</button>
+    <button onclick="showTab('borclar')">Borçlarım</button>
 </div>
 
-<div class="card">
-    <div id="liste"></div>
-    <div id="toplam" class="toplam-alan">Toplam: 0 TL</div>
-    <button class="btn-whatsapp" onclick="whatsappPaylas()" style="background:#25d366">Teklif Gönder (WhatsApp)</button>
-</div>
+<!-- Sekme İçerikleri -->
+<div id="teklif-tab"> ... (Eski hesap makinen buraya gelecek) ... </div>
+<div id="musteri-tab" style="display:none;"> ... (Müşteri listesi buraya gelecek) ... </div>
+<div id="borclar-tab" style="display:none;"> ... (Borçlu olduğumuz yerler buraya gelecek) ... </div>
 
 <script>
-    let veriler = [];
-    let urunler = [
-        {ad: "Kapı Kasası", fiyat: 1500, tip: "adet"}, {ad: "Kapı Kanadı", fiyat: 1500, tip: "adet"},
-        {ad: "Kapı Kasa+Kanat", fiyat: 2750, tip: "adet"}, {ad: "Tek Yön Düz Mat", fiyat: 1500, tip: "m2"},
-        {ad: "Tek Yön Çıtalı Mat", fiyat: 1750, tip: "m2"}, {ad: "Tek Yön Düz Parlak", fiyat: 3000, tip: "m2"},
-        {ad: "Tek Yön Çıtalı Parlak", fiyat: 3500, tip: "m2"}, {ad: "Sandalye Basit", fiyat: 800, tip: "adet"},
-        {ad: "Sandalye İşçilikli", fiyat: 1250, tip: "adet"}
-    ];
-
-    function urunleriYukle() {
-        const select = document.getElementById('urun');
-        select.innerHTML = '';
-        urunler.forEach((u, i) => {
-            select.innerHTML += `<option value="${i}">${u.ad} (${u.fiyat} TL)</option>`;
-        });
-    }
-    
-    function toggleAyarlar() { document.getElementById('ayarlar-paneli').style.display = (document.getElementById('ayarlar-paneli').style.display === 'block') ? 'none' : 'block'; }
-    
-    function fiyatlariGuncelle() {
-        let yeniFiyatlar = document.getElementById('fiyatListesi').value.split(',');
-        yeniFiyatlar.forEach((f, i) => { if(urunler[i]) urunler[i].fiyat = parseInt(f); });
-        urunleriYukle();
-        toggleAyarlar();
-    }
-
-    function toggleInputs() {
-        const u = urunler[document.getElementById('urun').value];
-        document.getElementById('ebat-alan').style.display = (u.tip === 'm2') ? 'block' : 'none';
-    }
-
-    document.getElementById('urun').onchange = toggleInputs;
-    urunleriYukle();
-
-    function hesapla() {
-        const u = urunler[document.getElementById('urun').value];
-        const en = parseFloat(document.getElementById('en').value) || 0;
-        const boy = parseFloat(document.getElementById('boy').value) || 0;
-        const adet = parseInt(document.getElementById('adet').value) || 1;
-        
-        let m2 = (u.tip === 'm2') ? ((en * boy) / 10000) * adet : 0;
-        let fiyat = (u.tip === 'm2') ? (m2 * u.fiyat) : (u.fiyat * adet);
-        let miktar = (u.tip === 'm2') ? `${m2.toFixed(2)} m²` : `${adet} Adet`;
-
-        veriler.push({urun: u.ad, miktar, fiyat});
-        render();
-    }
-
-    function sil(index) { veriler.splice(index, 1); render(); }
-
-    function render() {
-        const liste = document.getElementById('liste');
-        liste.innerHTML = '';
-        let tFiyat = 0;
-        veriler.forEach((v, i) => {
-            liste.innerHTML += `
-                <div class="item-row">
-                    <div><div style="font-weight:bold">${v.urun}</div><small>${v.miktar}</small></div>
-                    <div style="display:flex; align-items:center"><div style="font-weight:bold; margin-right:10px">${v.fiyat.toLocaleString()} TL</div><span class="delete-btn" onclick="sil(${i})">X</span></div>
-                </div>`;
-            tFiyat += v.fiyat;
-        });
-        document.getElementById('toplam').innerText = `Toplam: ${tFiyat.toLocaleString()} TL`;
-    }
-
-    function whatsappPaylas() {
-        let metin = "Dijital Turgut - Teklifim:\n\n";
-        veriler.forEach(v => { metin += `*${v.urun}* (${v.miktar}): ${v.fiyat.toLocaleString()} TL\n`; });
-        metin += `\n*GENEL TOPLAM:* ${document.getElementById('toplam').innerText.split(': ')[1]}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(metin)}`, '_blank');
+    function showTab(tab) {
+        document.getElementById('teklif-tab').style.display = (tab === 'teklif') ? 'block' : 'none';
+        document.getElementById('musteri-tab').style.display = (tab === 'musteri') ? 'block' : 'none';
+        document.getElementById('borclar-tab').style.display = (tab === 'borclar') ? 'block' : 'none';
     }
 </script>
-</body>
-</html>
